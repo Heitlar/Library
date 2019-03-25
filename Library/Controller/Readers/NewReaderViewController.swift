@@ -20,21 +20,12 @@ class NewReaderViewController: RealmVC {
     @IBOutlet weak var houseNumber: UITextField!
     @IBOutlet weak var street: UITextField!
     @IBOutlet weak var city: UITextField!
+    @IBOutlet weak var scrollView: UIScrollView!
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.hideKeyboardWhenScreenTapped()
-
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        NotificationCenter.default.addObserver(self, selector: #selector(keyBoardWillShow), name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
-    }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
-        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
+        superScrollView = scrollView
     }
     
     @IBAction func saveAndSendReaderDetails(_ sender: Any) {
@@ -55,15 +46,5 @@ class NewReaderViewController: RealmVC {
         
         sendTextFile(file, withText: text)
     }
-    @objc func keyBoardWillShow(notification: NSNotification) {
-        if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
-            if houseNumber.isFirstResponder || street.isFirstResponder || city.isFirstResponder {
-                self.view.frame.origin.y -= keyboardSize.height
-            }
-        }
-    }
-    
-    @objc func keyboardWillHide() {
-        self.view.frame.origin.y = 0
-    }
+
 }

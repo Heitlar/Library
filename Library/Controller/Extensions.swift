@@ -11,17 +11,12 @@ import RealmSwift
 
 extension UITableViewController {
     
+    
     func saveToRealm(_ object: Object) {
-        let realm = try! Realm()
-        do {
-            try realm.write {
-                realm.add(object)
-            }
-        } catch {
-            return
-        }
+        saveToRealmDB(object)
         tableView.reloadData()
     }
+    
     func deleteFromRealm(_ object: Object) {
         let realm = try! Realm()
         do {
@@ -37,13 +32,33 @@ extension UITableViewController {
 }
 
 extension UIViewController {
+       
+    func simpleAlert(message: String, handler: ((UIAlertAction) -> Void)? = nil) {
+        let alertController = UIAlertController(title: "", message: message, preferredStyle: .alert)
+        let alertAction = UIAlertAction(title: "OK", style: .default, handler: handler)
+        alertController.addAction(alertAction)
+        self.present(alertController, animated: true, completion: nil)
+    }
+    
     func hideKeyboardWhenScreenTapped() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         
         view.addGestureRecognizer(tapGesture)
     }
+    
     @objc func handleTap() {
         view.endEditing(true)
+    }
+    
+    @objc func saveToRealmDB(_ object: Object) {
+        let realm = try! Realm()
+        do {
+            try realm.write {
+                realm.add(object)
+            }
+        } catch {
+            return
+        }
     }
 }
 

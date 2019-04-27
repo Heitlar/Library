@@ -13,6 +13,7 @@ class TableVCWithSearchBar: UITableViewController, UISearchBarDelegate {
 
     let realm = try! Realm()
     weak var superSearchBar: UISearchBar!
+    var chosenBook : Book?
     
     override func viewDidLoad() {
         super.viewDidLoad()

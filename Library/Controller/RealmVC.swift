@@ -15,6 +15,24 @@ class RealmVC: UIViewController, MFMailComposeViewControllerDelegate{
     let realm = try! Realm()
     var superScrollView = UIScrollView()
     
+    static var bookAccessionNumber : String?
+    
+    var chosenBook : Book?
+    
+    var QRISBN = ""
+    var QRauthorLastName = ""
+    var QRinitials = ""
+    var QRbookName = ""
+    var QRpublisherName = ""
+    var QRpublisherCity = ""
+    var QRyearOfPublication = ""
+    var QRnumberOfPages = ""
+    var QRaccessionNumber = ""
+    var QRprice = ""
+    var QRBBK = ""
+    var QRauthorSign = ""
+    var QRscrollView = ""
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -72,4 +90,6 @@ class RealmVC: UIViewController, MFMailComposeViewControllerDelegate{
         superScrollView.contentInset = UIEdgeInsets.zero
         superScrollView.scrollIndicatorInsets = UIEdgeInsets.zero
     }
+    
+    
 }

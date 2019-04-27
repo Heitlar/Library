@@ -12,15 +12,20 @@ import RealmSwift
 class ReadersTableViewController: TableVCWithSearchBar {
 
     @IBOutlet weak var searchBar: UISearchBar!
-//    let realm = try! Realm()
+
     var readers: Results<Reader>?
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         superSearchBar = searchBar
         searchBar.delegate = self
+        
+//        self.hideKeyboardWhenScreenTapped()
+//        tableView.keyboardDismissMode = UIScrollView.KeyboardDismissMode.onDrag
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
         load()
-        self.hideKeyboardWhenScreenTapped()
     }
 
     // MARK: - Table view data source
@@ -45,40 +50,43 @@ class ReadersTableViewController: TableVCWithSearchBar {
         }
     }
     
-    @IBAction func addReader(_ sender: UIBarButtonItem) {
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
+        if let bookToTake = chosenBook {
+            let selectedReader = readers![indexPath.row]
+            
+            try! realm.write {
+                selectedReader.booksInUse.append(bookToTake)
+            }
+            
+            chosenBook = nil
+            
+            simpleAlert(message: "Книга была выдана читателю.") { alert in
+                self.navigationController?.popToRootViewController(animated: true)
+            }
+
+        } else {
+            performSegue(withIdentifier: "toReaderInfo", sender: self)
+            tableView.deselectRow(at: indexPath, animated: true)
+        }
+    }
+    
+    @IBAction func addReader(_ sender: UIBarButtonItem) {
         performSegue(withIdentifier: "ToNewReader", sender: self)
-//        let alertController = UIAlertController(title: "Добавить читателя:", message: "", preferredStyle: .alert)
-//        let alertAction = UIAlertAction(title: "Добавить", style: .default) { (action) in
-//
-//            guard let lastName = alertController.textFields?[0].text else { print("Введите фамилию"); return }
-//            guard let firstName = alertController.textFields?[1].text else { print("Введите имя"); return }
-//            guard let patronymic = alertController.textFields?[2].text else { print("Введите отчество"); return }
-//
-//            let newReader = Reader()
-//            newReader.firstName = firstName
-//            newReader.lastName = lastName
-//            newReader.patronymic = patronymic
-//            self.saveToRealm(newReader)
-//
-//        }
-//        let cancelAction = UIAlertAction(title: "Отмена", style: .cancel, handler: nil)
-//
-//        alertController.addTextField { (textField) in
-//            textField.placeholder = "Фамилия"
-//            textField.autocapitalizationType = .sentences
-//        }
-//        alertController.addTextField { (textField) in
-//            textField.placeholder = "Имя"
-//            textField.autocapitalizationType = .sentences
-//        }
-//        alertController.addTextField { (textField) in
-//            textField.placeholder = "Отчество"
-//            textField.autocapitalizationType = .sentences
-//        }
-//        alertController.addAction(alertAction)
-//        alertController.addAction(cancelAction)
-//        present(alertController, animated: true, completion: nil)
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "toReaderInfo" {
+            let destinationVC = segue.destination as! ReaderInformationVC
+            guard let indexPath = tableView.indexPathForSelectedRow else { return }
+            if readers![indexPath.row].booksInUse.count > 0 {
+                destinationVC.chosenBook = readers?[indexPath.row].booksInUse[0]
+                destinationVC.selectedReader = realm.object(ofType: Reader.self, forPrimaryKey: readers?[indexPath.row].libraryCardNumber)
+//                RealmVC.libraryCardOfReader = readers?[indexPath.row].libraryCardNumber
+            } else {
+                destinationVC.chosenBook = nil
+            }
+        }
     }
     
     func load() {

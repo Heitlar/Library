@@ -17,6 +17,7 @@ class NewReaderViewController: RealmVC {
     @IBOutlet weak var birthDate: UITextField!
     @IBOutlet weak var gender: UITextField!
     @IBOutlet weak var profile: UITextField!
+    @IBOutlet weak var libraryCardNumber: UITextField!
     @IBOutlet weak var houseNumber: UITextField!
     @IBOutlet weak var street: UITextField!
     @IBOutlet weak var city: UITextField!
@@ -28,7 +29,7 @@ class NewReaderViewController: RealmVC {
         superScrollView = scrollView
     }
     
-    @IBAction func saveAndSendReaderDetails(_ sender: Any) {
+    @IBAction func exportReaderDetails(_ sender: Any) {
         
         let file = "\(lastName.text!).txt"
         
@@ -46,5 +47,40 @@ class NewReaderViewController: RealmVC {
         
         sendTextFile(file, withText: text)
     }
+    
+    @IBAction func saveReaderToRealm(_ sender: Any) {
+    
+        let newReader = Reader()
+        newReader.lastName = lastName.text!
+        newReader.firstName = firstName.text!
+        newReader.patronymic = patronimic.text!
+        newReader.birthDate = birthDate.text!
+        newReader.gender = gender.text!
+        newReader.profile = profile.text!
+        newReader.libraryCardNumber = libraryCardNumber.text!
+        newReader.houseNumber = houseNumber.text!
+        newReader.street = street.text!
+        newReader.city = city.text!
+        
+        guard newReader.libraryCardNumber != "" else {
+            simpleAlert(message: "Введите номер читательского билета. ") { action in
+                self.libraryCardNumber.becomeFirstResponder()
+            }
+            return
+        }
+        
+        if realm.objects(Reader.self).filter("libraryCardNumber == '\(newReader.libraryCardNumber)'").count > 0 {
+   
+            simpleAlert(message: "Читатель с таким номером читательского билета уже существует.") { action in
+                self.libraryCardNumber.becomeFirstResponder()
+                return
+            }
+        }
+        saveToRealmDB(newReader)
+        simpleAlert(message: "Новый читатель был добавлен в базу.") { action in
+            self.navigationController?.popViewController(animated: true)
+        }
+    }
+    
 
 }

@@ -8,6 +8,8 @@
 
 import UIKit
 
+var selectedBook : Book?
+
 class NewBookViewController: RealmVC {
 
     @IBOutlet weak var ISBN: UITextField!
@@ -24,18 +26,23 @@ class NewBookViewController: RealmVC {
     @IBOutlet weak var authorSign: UITextField!
     @IBOutlet weak var scrollView: UIScrollView!
     
+    var editExistingBook = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.hideKeyboardWhenScreenTapped()
         superScrollView = scrollView
+        print("ISBN: \(QRISBN)")
+        fillTextFields()
     }
     
 
-    @IBAction func saveAndSendBookDetails(_ sender: Any) {
+    @IBAction func exportBookDetails(_ sender: Any) {
         let file = "\(bookName.text!).txt"
         
         let text = """
         #920: PAZK\r
+        #10: ^A\(ISBN.text!)\r
         #700: ^A\(authorLastName.text!)^B\(initials.text!)\r
         #200: ^A\(bookName.text!)\r
         #210: ^C\(publisherName.text!)^4\(publisherCity.text!)^D\(yearOfPublication.text!)\r
@@ -47,6 +54,77 @@ class NewBookViewController: RealmVC {
         """
         
         sendTextFile(file, withText: text)
+    }
+    
+    @IBAction func saveToRealmButton(_ sender: Any) {
+        let newBook = Book()
+        newBook.ISBN = ISBN.text!
+        newBook.authorLastName = authorLastName.text!
+        newBook.initials = initials.text!
+        newBook.bookName = bookName.text!
+        newBook.publisherName = publisherName.text!
+        newBook.publisherCity = publisherCity.text!
+        newBook.yearOfPublication = yearOfPublication.text!
+        newBook.numberOfPages = numberOfPages.text!
+        newBook.accessionNumber = accessionNumber.text!
+        newBook.price = price.text!
+        newBook.BBK = BBK.text!
+        newBook.authorSign = authorSign.text!
+        
+        if editExistingBook {
+//            /////////////////
+//            chosenBook = realm.object(ofType: Book.self, forPrimaryKey: RealmVC.bookAccessionNumber)
+            try! realm.write {
+                chosenBook?.ISBN = newBook.ISBN
+                chosenBook?.authorLastName = newBook.authorLastName
+                chosenBook?.initials = newBook.initials
+                chosenBook?.bookName = newBook.bookName
+                chosenBook?.publisherName = newBook.publisherName
+                chosenBook?.publisherCity = newBook.publisherCity
+                chosenBook?.yearOfPublication = newBook.yearOfPublication
+                chosenBook?.numberOfPages = newBook.numberOfPages
+                chosenBook?.price = newBook.price
+                chosenBook?.BBK = newBook.BBK
+                chosenBook?.authorSign = newBook.authorSign
+            }
+            
+            editExistingBook = false
+            chosenBook = nil
+            navigationController?.popViewController(animated: true)
+            return
+        }
+        guard newBook.accessionNumber != "" else {
+            self.simpleAlert(message: "Введите инвентарный номер.") { action in
+                self.accessionNumber.becomeFirstResponder()
+            }
+            return
+        }
+        if realm.objects(Book.self).filter("accessionNumber = '\(newBook.accessionNumber)'").count > 0 {
+            print("Книга с таким инвентарным номером уже существует.")
+            simpleAlert(message: "Книга с таким инвентарным номером уже существует.") { action in
+                self.accessionNumber.becomeFirstResponder()
+            }
+            return
+        }
+        
+        saveToRealmDB(newBook)
+        navigationController?.popViewController(animated: true)
+    }
+    
+    
+    func fillTextFields() {
+        ISBN.text = QRISBN
+        authorLastName.text = QRauthorLastName
+        initials.text = QRinitials
+        bookName.text = QRbookName
+        publisherName.text = QRpublisherName
+        publisherCity.text = QRpublisherCity
+        yearOfPublication.text = QRyearOfPublication
+        numberOfPages.text = QRnumberOfPages
+        accessionNumber.text = QRaccessionNumber
+        price.text = QRprice
+        BBK.text = QRBBK
+        authorSign.text = QRauthorSign
     }
     
 }

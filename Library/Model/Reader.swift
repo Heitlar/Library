@@ -10,14 +10,17 @@ import Foundation
 import RealmSwift
 
 class Reader: Object {
-    
-    @objc dynamic var firstName = ""
+   
     @objc dynamic var lastName = ""
+    @objc dynamic var firstName = ""
     @objc dynamic var patronymic = ""
-//    @objc dynamic var gender = ""
-//    @objc dynamic var profile = ""
-//    @objc dynamic var date = ""
-//    @objc dynamic var address = ""
+    @objc dynamic var birthDate = ""
+    @objc dynamic var gender = ""
+    @objc dynamic var profile = ""
+    @objc dynamic var libraryCardNumber = ""
+    @objc dynamic var houseNumber = ""
+    @objc dynamic var street = ""
+    @objc dynamic var city = ""
     @objc dynamic var fullName: String {
         get {
             return lastName + " " + firstName + " " + patronymic
@@ -25,4 +28,7 @@ class Reader: Object {
     }
     let booksInUse = List<Book>()
     
+    override static func primaryKey() -> String? {
+        return "libraryCardNumber"
+    }
 }

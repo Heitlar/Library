@@ -12,11 +12,17 @@ class BookInformationVC: RealmVC {
 
     @IBOutlet weak var authorName: UILabel!
     @IBOutlet weak var bookName: UILabel!
+    @IBOutlet weak var BBK: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
+
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
         authorName.text = chosenBook?.authorFullName
-        bookName.text = chosenBook?.bookName        
+        bookName.text = chosenBook?.bookName
+        BBK.text = chosenBook?.BBK
     }
     
     @IBAction func loanBook(_ sender: Any) {
@@ -45,7 +51,6 @@ class BookInformationVC: RealmVC {
             destinationVC.QRauthorSign = chosenBook!.authorSign
             destinationVC.editExistingBook = true
             destinationVC.chosenBook = chosenBook
-//            destinationVC.bookAccessionNumber = bookAccessionNumber
         }
     }
     

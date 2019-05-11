@@ -11,11 +11,16 @@ import UIKit
 class ReaderInformationVC: RealmVC {
 
     @IBOutlet weak var booksInPosession: UILabel!
-    var selectedReader : Reader?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        booksInPosession.text = selectedReader?.booksInUse.map { $0.authorOfBook }.joined(separator: "\n")
+        
+        if selectedReader!.booksInUse.count > 0 {
+            booksInPosession.text = selectedReader?.booksInUse.map { $0.authorOfBook }.joined(separator: "\n")
+        } else {
+            booksInPosession.text = "Нет книг."
+        }
+        
     }
     
 
@@ -25,6 +30,18 @@ class ReaderInformationVC: RealmVC {
         }
         simpleAlert(message: "Все книги этого читателя были возвращены.") { alert in
             self.navigationController?.popToRootViewController(animated: true)
+        }
+    }
+    
+    @IBAction func editReaderInfo(_ sender: Any) {
+        performSegue(withIdentifier: "editReaderInfo", sender: self)
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "editReaderInfo" {
+            let destinationVC = segue.destination as! NewReaderViewController
+            destinationVC.editExistingReader = true
+            destinationVC.selectedReader = selectedReader
         }
     }
     

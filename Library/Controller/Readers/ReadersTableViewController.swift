@@ -79,13 +79,13 @@ class ReadersTableViewController: TableVCWithSearchBar {
         if segue.identifier == "toReaderInfo" {
             let destinationVC = segue.destination as! ReaderInformationVC
             guard let indexPath = tableView.indexPathForSelectedRow else { return }
-            if readers![indexPath.row].booksInUse.count > 0 {
-                destinationVC.chosenBook = readers?[indexPath.row].booksInUse[0]
-                destinationVC.selectedReader = realm.object(ofType: Reader.self, forPrimaryKey: readers?[indexPath.row].libraryCardNumber)
-//                RealmVC.libraryCardOfReader = readers?[indexPath.row].libraryCardNumber
-            } else {
-                destinationVC.chosenBook = nil
-            }
+//            if readers![indexPath.row].booksInUse.count > 0 {
+//                destinationVC.chosenBook = readers?[indexPath.row].booksInUse[0]
+//                destinationVC.selectedReader = realm.object(ofType: Reader.self, forPrimaryKey: readers?[indexPath.row].libraryCardNumber)
+//            } else {
+//                destinationVC.chosenBook = nil
+//            }
+            destinationVC.selectedReader = realm.object(ofType: Reader.self, forPrimaryKey: readers?[indexPath.row].libraryCardNumber)
         }
     }
     

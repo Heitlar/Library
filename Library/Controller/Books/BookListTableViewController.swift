@@ -19,12 +19,12 @@ class BookListTableViewController: TableVCWithSearchBar {
         super.viewDidLoad()
         superSearchBar = searchBar
         searchBar.delegate = self
-
     }
     
     override func viewWillAppear(_ animated: Bool) {
         load()
     }
+    
     
     // MARK: - Table view data source
     
@@ -65,7 +65,6 @@ class BookListTableViewController: TableVCWithSearchBar {
             let destinationVC = segue.destination as! BookInformationVC
             if let indexPath = tableView.indexPathForSelectedRow {
                 destinationVC.chosenBook = realm.object(ofType: Book.self, forPrimaryKey: books?[indexPath.row].accessionNumber)
-//                RealmVC.bookAccessionNumber = books?[indexPath.row].accessionNumber
 
             }
         }
@@ -73,7 +72,8 @@ class BookListTableViewController: TableVCWithSearchBar {
     
     
     func load() {
-        books = realm.objects(Book.self).filter("parentCategory.@count == 0").sorted(byKeyPath: "bookName")
+        books = realm.objects(Book.self).filter("parentCategory.@count == 0")
+//            .sorted(byKeyPath: "bookName")
         tableView.reloadData()
     }
     

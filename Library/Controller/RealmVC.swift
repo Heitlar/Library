@@ -17,6 +17,7 @@ class RealmVC: UIViewController, MFMailComposeViewControllerDelegate{
     
     static var bookAccessionNumber : String?
     
+    var selectedReader : Reader?
     var chosenBook : Book?
     
     var QRISBN = ""

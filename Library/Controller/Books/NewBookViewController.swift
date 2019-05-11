@@ -32,7 +32,6 @@ class NewBookViewController: RealmVC {
         super.viewDidLoad()
         self.hideKeyboardWhenScreenTapped()
         superScrollView = scrollView
-        print("ISBN: \(QRISBN)")
         fillTextFields()
     }
     
@@ -72,8 +71,7 @@ class NewBookViewController: RealmVC {
         newBook.authorSign = authorSign.text!
         
         if editExistingBook {
-//            /////////////////
-//            chosenBook = realm.object(ofType: Book.self, forPrimaryKey: RealmVC.bookAccessionNumber)
+
             try! realm.write {
                 chosenBook?.ISBN = newBook.ISBN
                 chosenBook?.authorLastName = newBook.authorLastName
@@ -101,7 +99,7 @@ class NewBookViewController: RealmVC {
         }
         if realm.objects(Book.self).filter("accessionNumber = '\(newBook.accessionNumber)'").count > 0 {
             print("Книга с таким инвентарным номером уже существует.")
-            simpleAlert(message: "Книга с таким инвентарным номером уже существует.") { action in
+            simpleAlert(message: "Книга с таким инвентарным номером уже существует.") { _ in
                 self.accessionNumber.becomeFirstResponder()
             }
             return

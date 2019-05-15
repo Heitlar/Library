@@ -20,6 +20,8 @@ class ReadersTableViewController: TableVCWithSearchBar {
         superSearchBar = searchBar
         searchBar.delegate = self
         
+        searchBar.layer.borderWidth = 1
+        searchBar.layer.borderColor = mainColor.cgColor
 //        self.hideKeyboardWhenScreenTapped()
 //        tableView.keyboardDismissMode = UIScrollView.KeyboardDismissMode.onDrag
     }
@@ -37,9 +39,9 @@ class ReadersTableViewController: TableVCWithSearchBar {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "readerCell", for: indexPath)
-        
         cell.textLabel?.text = readers?[indexPath.row].fullName ?? "Нет читателей"
-
+        cell.backgroundColor = .clear
+        
         return cell
     }
     

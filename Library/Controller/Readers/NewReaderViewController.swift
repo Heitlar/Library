@@ -15,7 +15,7 @@ class NewReaderViewController: RealmVC {
     @IBOutlet weak var firstNameLabel: UITextField!
     @IBOutlet weak var patronimicLabel: UITextField!
     @IBOutlet weak var birthDateLabel: UITextField!
-    @IBOutlet weak var genderLabel: UITextField!
+    @IBOutlet weak var genderButton: UIButton!
     @IBOutlet weak var profileLabel: UITextField!
     @IBOutlet weak var libraryCardNumberLabel: UITextField!
     @IBOutlet weak var houseNumberLabel: UITextField!
@@ -25,15 +25,19 @@ class NewReaderViewController: RealmVC {
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var chooseGender: UITableView!
     
+    let genders = ["м", "ж"]
+    
     var editExistingReader = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.hideKeyboardWhenScreenTapped()
+//        self.hideKeyboardWhenScreenTapped()
         superScrollView = scrollView
-//        chooseGender.isHidden = true
+        chooseGender.isHidden = true
         chooseGender.delegate = self
         chooseGender.dataSource = self
+        genderButton.layer.borderWidth = 1
+        genderButton.layer.borderColor = UIColor.black.cgColor
         updateLabels()
     }
     
@@ -47,7 +51,7 @@ class NewReaderViewController: RealmVC {
         #11: \(firstNameLabel.text!)\r
         #12: \(patronimicLabel.text!)\r
         #21: \(birthDateLabel.text!)\r
-        #23: \(genderLabel.text!)\r
+        #23: \(genderButton.titleLabel?.text ?? "")\r
         #50: \(profileLabel.text!)\r
         #13: ^C\(cityLabel.text!)^D\(streetLabel.text!)^E\(houseNumberLabel.text!)\r
         *****
@@ -83,13 +87,18 @@ class NewReaderViewController: RealmVC {
         }
     }
     
+    @IBAction func genderButtonPressed(_ sender: Any) {
+  
+        chooseGender.isHidden = chooseGender.isHidden ? false : true
+    }
+    
     func updateLabels() {
         
         lastNameLabel.text = selectedReader?.lastName
         firstNameLabel.text = selectedReader?.firstName
         patronimicLabel.text = selectedReader?.patronymic
         birthDateLabel.text = selectedReader?.birthDate
-        genderLabel.text = selectedReader?.gender
+        genderButton.setTitle(selectedReader?.gender, for: .normal)
         profileLabel.text = selectedReader?.profile
         houseNumberLabel.text = selectedReader?.houseNumber
         streetLabel.text = selectedReader?.street
@@ -103,7 +112,7 @@ class NewReaderViewController: RealmVC {
             selectedReader?.firstName = firstNameLabel.text ?? ""
             selectedReader?.patronymic = patronimicLabel.text ?? ""
             selectedReader?.birthDate = birthDateLabel.text ?? ""
-            selectedReader?.gender = genderLabel.text ?? ""
+            selectedReader?.gender = genderButton.titleLabel?.text ?? ""
             selectedReader?.profile = profileLabel.text ?? ""
             selectedReader?.houseNumber = houseNumberLabel.text ?? ""
             selectedReader?.street = streetLabel.text ?? ""
@@ -117,7 +126,7 @@ class NewReaderViewController: RealmVC {
         newReader.firstName = firstNameLabel.text!
         newReader.patronymic = patronimicLabel.text!
         newReader.birthDate = birthDateLabel.text!
-        newReader.gender = genderLabel.text!
+        newReader.gender = genderButton.titleLabel?.text ?? ""
         newReader.profile = profileLabel.text!
         newReader.libraryCardNumber = libraryCardNumberLabel.text!
         newReader.houseNumber = houseNumberLabel.text!
@@ -125,7 +134,7 @@ class NewReaderViewController: RealmVC {
         newReader.city = cityLabel.text!
         return newReader
     }
-
+    
 //    func saveOrUpdateReaderDetails() {
 //
 //        updateLabels()
@@ -160,8 +169,14 @@ extension NewReaderViewController : UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "genderCell", for: indexPath)
-        cell.textLabel?.text = ["м", "ж"][indexPath.row]
+        cell.textLabel?.text = genders[indexPath.row]
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        print(indexPath.row)
+        genderButton.setTitle(genders[indexPath.row], for: .normal)
+        chooseGender.isHidden = true
     }
     
     

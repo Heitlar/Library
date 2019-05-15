@@ -12,13 +12,16 @@ import RealmSwift
 class BookListTableViewController: TableVCWithSearchBar {
     
     @IBOutlet weak var searchBar: UISearchBar!
-
+    
     var books: Results<Book>?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         superSearchBar = searchBar
         searchBar.delegate = self
+        searchBar.layer.borderWidth = 1
+        searchBar.layer.borderColor = mainColor.cgColor
+
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -37,6 +40,8 @@ class BookListTableViewController: TableVCWithSearchBar {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "bookCell", for: indexPath)
         cell.textLabel?.text = books?[indexPath.row].authorOfBook ?? "Нет книг"
+        cell.backgroundColor = .clear
+        
         return cell
     }
     
@@ -65,7 +70,7 @@ class BookListTableViewController: TableVCWithSearchBar {
             let destinationVC = segue.destination as! BookInformationVC
             if let indexPath = tableView.indexPathForSelectedRow {
                 destinationVC.chosenBook = realm.object(ofType: Book.self, forPrimaryKey: books?[indexPath.row].accessionNumber)
-
+                
             }
         }
     }
@@ -73,14 +78,14 @@ class BookListTableViewController: TableVCWithSearchBar {
     
     func load() {
         books = realm.objects(Book.self).filter("parentCategory.@count == 0")
-//            .sorted(byKeyPath: "bookName")
+        //            .sorted(byKeyPath: "bookName")
         tableView.reloadData()
     }
     
     override func search() {
         
         if searchBar.text! != "" {
-            books = realm.objects(Book.self).filter("authorLastName CONTAINS[cd] '\(searchBar.text!)' OR bookName CONTAINS[cd] '\(searchBar.text!)'").sorted(byKeyPath: "bookName")
+            books = realm.objects(Book.self).filter("authorLastName CONTAINS[cd] '\(searchBar.text!)' OR bookName CONTAINS[cd] '\(searchBar.text!)' OR accessionNumber CONTAINS[cd] '\(searchBar.text!)'").sorted(byKeyPath: "bookName")
         } else {
             load()
         }

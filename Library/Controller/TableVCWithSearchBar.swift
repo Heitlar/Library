@@ -14,11 +14,12 @@ class TableVCWithSearchBar: UITableViewController, UISearchBarDelegate {
     let realm = try! Realm()
     weak var superSearchBar: UISearchBar!
     var chosenBook : Book?
+    let mainColor = UIColor(red: 255, green: 255, blue: 150, alpha: 1)
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-
+        tableView.separatorColor = .blue
+        
     }
 
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {

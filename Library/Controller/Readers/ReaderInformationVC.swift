@@ -15,11 +15,14 @@ class ReaderInformationVC: RealmVC {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        self.navigationController?.title = "AAAAAAAAAA"
+        
         if selectedReader!.booksInUse.count > 0 {
             booksInPosession.text = selectedReader?.booksInUse.map { $0.authorOfBook }.joined(separator: "\n")
         } else {
             booksInPosession.text = "Нет книг."
         }
+        
         
     }
     

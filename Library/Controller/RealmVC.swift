@@ -36,7 +36,8 @@ class RealmVC: UIViewController, MFMailComposeViewControllerDelegate{
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        navigationController?.navigationBar.setValue(true, forKey: "hidesShadow")
+        let _ = getAllTextFields(from: self.view).map { $0.setLeftPaddingPoints(20) }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -85,6 +86,16 @@ class RealmVC: UIViewController, MFMailComposeViewControllerDelegate{
                 superScrollView.contentInset = UIEdgeInsets(top: 0.0, left: 0.0, bottom: keyboardSize.height, right: 0.0)
                 superScrollView.scrollIndicatorInsets = UIEdgeInsets(top: 0.0, left: 0.0, bottom: keyboardSize.height, right: 0.0)
         }
+    }
+    
+    func getAllTextFields(from view: UIView) -> [UITextField] {
+        return view.subviews.compactMap { (view) -> [UITextField]? in
+            if view is UITextField {
+                return [(view as! UITextField)]
+            } else {
+                return getAllTextFields(from: view)
+            }
+            }.flatMap({$0})
     }
     
     @objc func keyboardWillHide() {

@@ -11,19 +11,15 @@ import RealmSwift
 
 class ReadersTableViewController: TableVCWithSearchBar {
 
-    @IBOutlet weak var searchBar: UISearchBar!
-
     var readers: Results<Reader>?
+    let searchBar = UISearchBar()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        superSearchBar = searchBar
-        searchBar.delegate = self
         
-        searchBar.layer.borderWidth = 1
-        searchBar.layer.borderColor = mainColor.cgColor
-//        self.hideKeyboardWhenScreenTapped()
-//        tableView.keyboardDismissMode = UIScrollView.KeyboardDismissMode.onDrag
+        searchBar.delegate = self
+        self.navigationItem.titleView = searchBar
+        superSearchBar = searchBar
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -41,8 +37,18 @@ class ReadersTableViewController: TableVCWithSearchBar {
         let cell = tableView.dequeueReusableCell(withIdentifier: "readerCell", for: indexPath)
         cell.textLabel?.text = readers?[indexPath.row].fullName ?? "Нет читателей"
         cell.backgroundColor = .clear
-        
+        cell.backgroundColor = readers![indexPath.row].returnDelay ? .red : .clear
         return cell
+    }
+    
+    override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "readerCell")
+        cell?.textLabel?.text = "ФИО Читателя"
+        cell?.backgroundColor = UIColor.headerColor
+        return cell
+    }
+    override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return 44
     }
     
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
@@ -57,15 +63,29 @@ class ReadersTableViewController: TableVCWithSearchBar {
         if let bookToTake = chosenBook {
             let selectedReader = readers![indexPath.row]
             
-            try! realm.write {
-                selectedReader.booksInUse.append(bookToTake)
-            }
-            
-            chosenBook = nil
-            
-            simpleAlert(message: "Книга была выдана читателю.") { alert in
+            let alertController = UIAlertController(title: "На сколько дней выдается книга?", message: "", preferredStyle: .alert)
+            let alertAction = UIAlertAction(title: "Выдать", style: .default) { (action) in
+                guard let numberOfDays = Int(alertController.textFields![0].text!) else { return }
+                try! self.realm.write {
+                    bookToTake.returnDate = Calendar.current.date(byAdding: .day, value: numberOfDays, to: Date())
+                    bookToTake.borrower = selectedReader
+                }
                 self.navigationController?.popToRootViewController(animated: true)
             }
+            let cancelAction = UIAlertAction(title: "Отмена", style: .cancel) {_ in
+                self.tableView.deselectRow(at: indexPath, animated: true)
+            }
+            alertController.addTextField { (textField) in
+                textField.placeholder = "Введите количество дней."
+                textField.keyboardType = UIKeyboardType.numberPad
+            }
+            alertController.addAction(alertAction)
+            alertController.addAction(cancelAction)
+            present(alertController, animated: true, completion: nil)
+            
+//            simpleAlert(message: "Книга была выдана читателю.") { alert in
+//                self.navigationController?.popToRootViewController(animated: true)
+//            }
 
         } else {
             performSegue(withIdentifier: "toReaderInfo", sender: self)
@@ -81,13 +101,7 @@ class ReadersTableViewController: TableVCWithSearchBar {
         if segue.identifier == "toReaderInfo" {
             let destinationVC = segue.destination as! ReaderInformationVC
             guard let indexPath = tableView.indexPathForSelectedRow else { return }
-//            if readers![indexPath.row].booksInUse.count > 0 {
-//                destinationVC.chosenBook = readers?[indexPath.row].booksInUse[0]
-//                destinationVC.selectedReader = realm.object(ofType: Reader.self, forPrimaryKey: readers?[indexPath.row].libraryCardNumber)
-//            } else {
-//                destinationVC.chosenBook = nil
-//            }
-            destinationVC.selectedReader = realm.object(ofType: Reader.self, forPrimaryKey: readers?[indexPath.row].libraryCardNumber)
+            destinationVC.selectedReader = readers?[indexPath.row]
         }
     }
     
@@ -103,6 +117,7 @@ class ReadersTableViewController: TableVCWithSearchBar {
         } else {
             load()
         }
+        
         tableView.reloadData()
     }
     

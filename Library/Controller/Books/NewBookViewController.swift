@@ -8,8 +8,6 @@
 
 import UIKit
 
-var selectedBook : Book?
-
 class NewBookViewController: RealmVC {
 
     @IBOutlet weak var ISBN: UITextField!
@@ -33,14 +31,22 @@ class NewBookViewController: RealmVC {
         self.hideKeyboardWhenScreenTapped()
         superScrollView = scrollView
         fillTextFields()
+        accessionNumber.isEnabled = editExistingBook ? false : true
     }
     
+    override func textFieldDidBeginEditing(_ textField: UITextField) {
+        super.textFieldDidBeginEditing(textField)
+    }
+    
+    override func textFieldDidEndEditing(_ textField: UITextField, reason: UITextField.DidEndEditingReason) {
+        super.textFieldDidEndEditing(textField, reason: reason)
+    }
 
     @IBAction func exportBookDetails(_ sender: Any) {
         let file = "\(bookName.text!).txt"
         
         let text = """
-        #920: PAZK\r
+        #920: \r
         #10: ^A\(ISBN.text!)\r
         #700: ^A\(authorLastName.text!)^B\(initials.text!)\r
         #200: ^A\(bookName.text!)\r
@@ -55,35 +61,17 @@ class NewBookViewController: RealmVC {
         sendTextFile(file, withText: text)
     }
     
+    func createNewBook() -> Book {
+        return Book(ISBN: ISBN.text!, authorLastName: authorLastName.text!, initials: initials.text!, bookName: bookName.text!, publisherName: publisherName.text!, publisherCity: publisherCity.text!, yearOfPublication: yearOfPublication.text!, numberOfPages: numberOfPages.text!, accessionNumber: accessionNumber.text!, price: price.text!, BBK: BBK.text!, authorSign: authorSign.text!)
+    }
+    
     @IBAction func saveToRealmButton(_ sender: Any) {
-        let newBook = Book()
-        newBook.ISBN = ISBN.text!
-        newBook.authorLastName = authorLastName.text!
-        newBook.initials = initials.text!
-        newBook.bookName = bookName.text!
-        newBook.publisherName = publisherName.text!
-        newBook.publisherCity = publisherCity.text!
-        newBook.yearOfPublication = yearOfPublication.text!
-        newBook.numberOfPages = numberOfPages.text!
-        newBook.accessionNumber = accessionNumber.text!
-        newBook.price = price.text!
-        newBook.BBK = BBK.text!
-        newBook.authorSign = authorSign.text!
+        let newBook = createNewBook()
         
         if editExistingBook {
-
+            
             try! realm.write {
-                chosenBook?.ISBN = newBook.ISBN
-                chosenBook?.authorLastName = newBook.authorLastName
-                chosenBook?.initials = newBook.initials
-                chosenBook?.bookName = newBook.bookName
-                chosenBook?.publisherName = newBook.publisherName
-                chosenBook?.publisherCity = newBook.publisherCity
-                chosenBook?.yearOfPublication = newBook.yearOfPublication
-                chosenBook?.numberOfPages = newBook.numberOfPages
-                chosenBook?.price = newBook.price
-                chosenBook?.BBK = newBook.BBK
-                chosenBook?.authorSign = newBook.authorSign
+                realm.add(newBook, update: true)
             }
             
             editExistingBook = false
@@ -111,18 +99,18 @@ class NewBookViewController: RealmVC {
     
     
     func fillTextFields() {
-        ISBN.text = QRISBN
-        authorLastName.text = QRauthorLastName
-        initials.text = QRinitials
-        bookName.text = QRbookName
-        publisherName.text = QRpublisherName
-        publisherCity.text = QRpublisherCity
-        yearOfPublication.text = QRyearOfPublication
-        numberOfPages.text = QRnumberOfPages
-        accessionNumber.text = QRaccessionNumber
-        price.text = QRprice
-        BBK.text = QRBBK
-        authorSign.text = QRauthorSign
+        ISBN.text = chosenBook?.ISBN
+        authorLastName.text = chosenBook?.authorLastName
+        initials.text = chosenBook?.initials
+        bookName.text = chosenBook?.bookName
+        publisherName.text = chosenBook?.publisherName
+        publisherCity.text = chosenBook?.publisherCity
+        yearOfPublication.text = chosenBook?.yearOfPublication
+        numberOfPages.text = chosenBook?.numberOfPages
+        accessionNumber.text = chosenBook?.accessionNumber
+        price.text = chosenBook?.price
+        BBK.text = chosenBook?.BBK
+        authorSign.text = chosenBook?.authorSign
     }
     
 }

@@ -12,16 +12,7 @@ import QRCodeReader
 
 class StartViewController: RealmVC,  QRCodeReaderViewControllerDelegate {
 
-    @IBOutlet weak var scanQRButton: UIButton!
-    @IBOutlet weak var qrImageView: UIImageView!
-    @IBOutlet weak var bookListButton: UIButton!
-    @IBOutlet weak var booksImageView: UIImageView!
-    @IBOutlet weak var readerListButton: UIButton!
-    @IBOutlet weak var readersImageView: UIImageView!
-    
-    var authorName = ""
-    var bookName = ""
-    var book = [String]()
+    var book = [String:String]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,12 +34,15 @@ class StartViewController: RealmVC,  QRCodeReaderViewControllerDelegate {
     func reader(_ reader: QRCodeReaderViewController, didScanResult result: QRCodeReaderResult) {
         reader.stopScanning()
         dismiss(animated: true) {
-            self.book = result.value.components(separatedBy: "\r\n")
-            guard self.book.count == 12 else {
-                self.simpleAlert(message: "Invalid QR code!")
-                return
+            print(result.value)
+            let arrayOfResults = result.value.components(separatedBy: "\r\n")
+            self.book = arrayOfResults.reduce(into: [String:String]()) { (dictionary, element) in
+                let dictElementsArray = element.components(separatedBy: ":")
+                if dictElementsArray.count == 2 {
+                    dictionary[dictElementsArray[0].trimmingCharacters(in: .whitespaces)] = dictElementsArray[1].trimmingCharacters(in: .whitespaces)
+                }
             }
-            
+         
             self.performSegue(withIdentifier: "NewBook", sender: self)
         }
     }
@@ -67,18 +61,20 @@ class StartViewController: RealmVC,  QRCodeReaderViewControllerDelegate {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "NewBook" {
             let destinationVC = segue.destination as! NewBookViewController
-            destinationVC.QRISBN = self.book[0]
-            destinationVC.QRauthorLastName = self.book[1]
-            destinationVC.QRinitials = self.book[2]
-            destinationVC.QRbookName = self.book[3]
-            destinationVC.QRpublisherName = self.book[4]
-            destinationVC.QRpublisherCity = self.book[5]
-            destinationVC.QRyearOfPublication = self.book[6]
-            destinationVC.QRnumberOfPages = self.book[7]
-            destinationVC.QRaccessionNumber = self.book[8]
-            destinationVC.QRprice = self.book[9]
-            destinationVC.QRBBK = self.book[10]
-            destinationVC.QRauthorSign = self.book[11]
+            
+            destinationVC.chosenBook = Book()
+            destinationVC.chosenBook?.ISBN = book["ISBN"] ?? ""
+            destinationVC.chosenBook?.authorLastName = book["Фамилия автора"] ?? ""
+            destinationVC.chosenBook?.initials = book["Инициалы автора"] ?? ""
+            destinationVC.chosenBook?.bookName = book["Название книги"] ?? ""
+            destinationVC.chosenBook?.publisherName = book["Название издательства"] ?? ""
+            destinationVC.chosenBook?.publisherCity = book["Город издания"] ?? ""
+            destinationVC.chosenBook?.yearOfPublication = book["Год издания"] ?? ""
+            destinationVC.chosenBook?.numberOfPages = book["Число страниц"] ?? ""
+            destinationVC.chosenBook?.price = book["Цена"] ?? ""
+            destinationVC.chosenBook?.BBK = book["ББК"] ?? ""
+            destinationVC.chosenBook?.authorSign = book["Авторский знак"] ?? ""
+
         }
     }
 

@@ -9,6 +9,11 @@
 import Foundation
 import RealmSwift
 
+extension UIColor {
+    static var headerColor: UIColor { return UIColor(red: 123/255, green: 245/255, blue: 255/255, alpha: 1) }
+    static var mainColor: UIColor { return UIColor(red: 255/255, green: 255/255, blue: 150/255, alpha: 1) }
+}
+
 extension UITableViewController {
     
     
@@ -32,17 +37,22 @@ extension UITableViewController {
 }
 
 extension UIViewController {
-       
-    func simpleAlert(message: String, handler: ((UIAlertAction) -> Void)? = nil) {
+    
+    func simpleAlert(message: String, withCancelButton: Bool = false, handler: ((UIAlertAction) -> Void)? = nil) {
         let alertController = UIAlertController(title: "", message: message, preferredStyle: .alert)
         let alertAction = UIAlertAction(title: "OK", style: .default, handler: handler)
+        
+        if withCancelButton {
+            let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+            alertController.addAction(cancelAction)
+        }
+        
         alertController.addAction(alertAction)
         self.present(alertController, animated: true, completion: nil)
     }
     
     func hideKeyboardWhenScreenTapped() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
-        
         view.addGestureRecognizer(tapGesture)
     }
     
@@ -50,7 +60,7 @@ extension UIViewController {
         view.endEditing(true)
     }
     
-    @objc func saveToRealmDB(_ object: Object) {
+    func saveToRealmDB(_ object: Object) {
         let realm = try! Realm()
         do {
             try realm.write {
@@ -60,6 +70,7 @@ extension UIViewController {
             return
         }
     }
+    
 }
 
 extension UITextField {
@@ -67,5 +78,15 @@ extension UITextField {
         let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: amount, height: self.frame.size.height))
         self.leftView = paddingView
         self.leftViewMode = .always
+    }
+}
+
+extension Date {
+    func inFormOfString() -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .long
+        dateFormatter.timeStyle = .none
+        dateFormatter.locale = Locale(identifier: "ru_RU")
+        return dateFormatter.string(from: self)
     }
 }

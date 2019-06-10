@@ -14,38 +14,34 @@ class RealmVC: UIViewController, MFMailComposeViewControllerDelegate{
     
     let realm = try! Realm()
     var superScrollView = UIScrollView()
+    var activeField: UITextField?
     
     static var bookAccessionNumber : String?
     
     var selectedReader : Reader?
     var chosenBook : Book?
     
-    var QRISBN = ""
-    var QRauthorLastName = ""
-    var QRinitials = ""
-    var QRbookName = ""
-    var QRpublisherName = ""
-    var QRpublisherCity = ""
-    var QRyearOfPublication = ""
-    var QRnumberOfPages = ""
-    var QRaccessionNumber = ""
-    var QRprice = ""
-    var QRBBK = ""
-    var QRauthorSign = ""
-    var QRscrollView = ""
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.navigationBar.setValue(true, forKey: "hidesShadow")
         let _ = getAllTextFields(from: self.view).map { $0.setLeftPaddingPoints(20) }
+        nextTextField()
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        NotificationCenter.default.addObserver(self, selector: #selector(keyBoardWillShow), name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+       registerForKeyboardNotifications()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
+        deregisterFromKeyboardNotifications()
+    }
+    
+    func registerForKeyboardNotifications() {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWasShown(notification:)), name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    func deregisterFromKeyboardNotifications() {
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
     }
@@ -81,10 +77,44 @@ class RealmVC: UIViewController, MFMailComposeViewControllerDelegate{
         controller.dismiss(animated: true, completion: nil)
     }
     
-    @objc func keyBoardWillShow(notification: NSNotification) {
-        if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
-                superScrollView.contentInset = UIEdgeInsets(top: 0.0, left: 0.0, bottom: keyboardSize.height, right: 0.0)
-                superScrollView.scrollIndicatorInsets = UIEdgeInsets(top: 0.0, left: 0.0, bottom: keyboardSize.height, right: 0.0)
+    
+    @objc func keyboardWillHide() {
+        superScrollView.contentInset = UIEdgeInsets.zero
+        superScrollView.scrollIndicatorInsets = UIEdgeInsets.zero
+    }
+    
+    @objc func keyboardWasShown(notification: NSNotification) {
+        self.superScrollView.isScrollEnabled = true
+        var info = notification.userInfo!
+        let keyboardSize = (info[UIResponder.keyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue.size
+        let contentInsets = UIEdgeInsets(top: 0.0, left: 0.0, bottom: keyboardSize!.height, right: 0.0)
+        self.superScrollView.contentInset = contentInsets
+        self.superScrollView.scrollIndicatorInsets = contentInsets
+        
+        var aRect = self.view.frame
+        aRect.size.height -= keyboardSize!.height
+        if let activeField = self.activeField  {
+            if (!aRect.contains(activeField.frame.origin)) {
+                self.superScrollView.scrollRectToVisible(activeField.frame, animated: true)
+            }
+        }
+    }
+    
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        activeField = textField
+    }
+    
+    func textFieldDidEndEditing(_ textField: UITextField, reason: UITextField.DidEndEditingReason) {
+        activeField = nil
+    }
+    
+    func nextTextField() {
+        let textFields = getAllTextFields(from: self.view)
+        guard let last = textFields.last else { return }
+        for i in 0..<textFields.count - 1 {
+            textFields[i].returnKeyType = .next
+            textFields[i].addTarget(textFields[i + 1], action: #selector(becomeFirstResponder), for: .editingDidEndOnExit)
+            last.addTarget(last, action: #selector(resignFirstResponder), for: .editingDidEndOnExit)
         }
     }
     
@@ -98,10 +128,6 @@ class RealmVC: UIViewController, MFMailComposeViewControllerDelegate{
             }.flatMap({$0})
     }
     
-    @objc func keyboardWillHide() {
-        superScrollView.contentInset = UIEdgeInsets.zero
-        superScrollView.scrollIndicatorInsets = UIEdgeInsets.zero
-    }
-    
+
     
 }

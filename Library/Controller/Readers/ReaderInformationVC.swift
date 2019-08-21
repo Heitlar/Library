@@ -19,7 +19,7 @@ class ReaderInformationVC: RealmVC {
     @IBOutlet weak var tableViewHeightConstraint: NSLayoutConstraint!
     @IBOutlet weak var telephoneNumberLabel: UILabel!
     @IBOutlet weak var addressLabel: UILabel!
-    @IBOutlet weak var emailLabel: UILabel!
+    @IBOutlet weak var emailButton: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -35,13 +35,15 @@ class ReaderInformationVC: RealmVC {
         self.title = selectedReader?.fullName
         telephoneNumberLabel.text = selectedReader?.address?.telephoneNumber
         addressLabel.text = selectedReader?.address?.fullAddress
-        emailLabel.text = selectedReader?.address?.email
+        emailButton.setTitle(selectedReader?.address?.email, for: .normal)
         load()
-//        booksInUse = selectedReader!.booksInUse.count
     }
     
 
-
+    @IBAction func sendEmail(_ sender: Any) {
+        sendEmailTo(emailButton.titleLabel!.text!)
+    }
+    
     @IBAction func returnAllBooks(_ sender: Any) {
         try! realm.write {
             selectedReader?.booksInUse.forEach { $0.borrower = nil; $0.returnDate = nil }

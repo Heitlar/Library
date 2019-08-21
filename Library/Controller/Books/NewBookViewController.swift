@@ -69,24 +69,24 @@ class NewBookViewController: RealmVC {
         let newBook = createNewBook()
         
         if editExistingBook {
-            
             try! realm.write {
-                realm.add(newBook, update: true)
+//                realm.add(newBook, update: true)
+                realm.add(newBook, update: .all)
             }
-            
             editExistingBook = false
             chosenBook = nil
             navigationController?.popViewController(animated: true)
             return
         }
+        
         guard newBook.accessionNumber != "" else {
             self.simpleAlert(message: "Введите инвентарный номер.") { action in
                 self.accessionNumber.becomeFirstResponder()
             }
             return
         }
+        
         if realm.objects(Book.self).filter("accessionNumber = '\(newBook.accessionNumber)'").count > 0 {
-            print("Книга с таким инвентарным номером уже существует.")
             simpleAlert(message: "Книга с таким инвентарным номером уже существует.") { _ in
                 self.accessionNumber.becomeFirstResponder()
             }

@@ -9,7 +9,6 @@
 import Foundation
 import RealmSwift
 
-
 class Book: Object {
     
     @objc dynamic var ISBN = ""

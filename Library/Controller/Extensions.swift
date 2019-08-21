@@ -33,7 +33,6 @@ extension UITableViewController {
         }
         tableView.reloadData()
     }
-
 }
 
 extension UIViewController {
@@ -70,7 +69,6 @@ extension UIViewController {
             return
         }
     }
-    
 }
 
 extension UITextField {

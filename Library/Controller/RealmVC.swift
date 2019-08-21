@@ -46,6 +46,18 @@ class RealmVC: UIViewController, MFMailComposeViewControllerDelegate{
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
+    func sendEmailTo(_ email: String) {
+        if MFMailComposeViewController.canSendMail() {
+            let mailComposer = MFMailComposeViewController()
+            mailComposer.mailComposeDelegate = self
+            mailComposer.setSubject("")
+            mailComposer.setMessageBody("", isHTML: false)
+            mailComposer.setToRecipients([email])
+            
+            present(mailComposer, animated: true, completion: nil)
+        }
+    }
+    
     func sendTextFile(_ file: String, withText text: String) {
         
         guard let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {return}
@@ -66,7 +78,6 @@ class RealmVC: UIViewController, MFMailComposeViewControllerDelegate{
             do {
                 let fileData = try Data(contentsOf: fileURL)
                 mailComposer.addAttachmentData(fileData, mimeType: "text/txt", fileName: file)
-                
             } catch {
                 
             }

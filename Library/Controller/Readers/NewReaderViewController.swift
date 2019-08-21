@@ -126,7 +126,8 @@ class NewReaderViewController: RealmVC {
         try! realm.write {
             let reader = createNewReader()
             reader.address = createNewAddress()
-            realm.add(reader, update: true)
+//            realm.add(reader, update: true)
+            realm.add(reader, update: .all)
         }
     }
     

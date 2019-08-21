@@ -10,12 +10,14 @@ import UIKit
 import RealmSwift
 
 class ReadersTableViewController: TableVCWithSearchBar {
-
+    
     var readers: Results<Reader>?
     let searchBar = UISearchBar()
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        manageRightBarButtonItem(#selector(goToNewReaderVC))
         
         searchBar.delegate = self
         self.navigationItem.titleView = searchBar
@@ -25,13 +27,13 @@ class ReadersTableViewController: TableVCWithSearchBar {
     override func viewWillAppear(_ animated: Bool) {
         load()
     }
-
+    
     // MARK: - Table view data source
-
+    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return readers?.count ?? 1
     }
-
+    
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "readerCell", for: indexPath)
@@ -63,6 +65,12 @@ class ReadersTableViewController: TableVCWithSearchBar {
         if let bookToTake = chosenBook {
             let selectedReader = readers![indexPath.row]
             
+            guard !selectedReader.returnDelay else {
+                let message = "У выбранного читателя имеется задолженность."
+                simpleAlert(message: message) {_ in tableView.deselectRow(at: indexPath, animated: true)}
+                return
+            }
+            
             let alertController = UIAlertController(title: "На сколько дней выдается книга?", message: "", preferredStyle: .alert)
             let alertAction = UIAlertAction(title: "Выдать", style: .default) { (action) in
                 guard let numberOfDays = Int(alertController.textFields![0].text!) else { return }
@@ -83,10 +91,6 @@ class ReadersTableViewController: TableVCWithSearchBar {
             alertController.addAction(cancelAction)
             present(alertController, animated: true, completion: nil)
             
-//            simpleAlert(message: "Книга была выдана читателю.") { alert in
-//                self.navigationController?.popToRootViewController(animated: true)
-//            }
-
         } else {
             performSegue(withIdentifier: "toReaderInfo", sender: self)
             tableView.deselectRow(at: indexPath, animated: true)
@@ -94,6 +98,10 @@ class ReadersTableViewController: TableVCWithSearchBar {
     }
     
     @IBAction func addReader(_ sender: UIBarButtonItem) {
+        goToNewReaderVC()
+    }
+    
+    @objc func goToNewReaderVC() {
         performSegue(withIdentifier: "ToNewReader", sender: self)
     }
     

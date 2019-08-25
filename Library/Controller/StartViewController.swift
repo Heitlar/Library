@@ -10,36 +10,16 @@ import UIKit
 import AVFoundation
 import QRCodeReader
 import Alamofire
-import SwiftyXMLParser
-import SwiftSoup
+import SwiftyJSON
 
 class StartViewController: RealmVC,  QRCodeReaderViewControllerDelegate {
 
     var bookDetailsDictionary = [String:String]()
     let googleURL = "https://www.googleapis.com/books/v1/volumes?q=isbn:"
-    let isbnSearchURL = "http://isbnsearch.org/isbn/"
     let librarythingURL = "http://www.librarything.com/services/rest/1.1/?method=librarything.ck.getwork&apikey=1f3787fb1c1bc2adb4a046cccaef5d61&isbn="
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        do {
-            let myHTMLString = try String(contentsOf: URL(string: "http://isbnsearch.org/isbn/9785170795857")!, encoding: .ascii)
-
-            let doc: Document = try SwiftSoup.parse(myHTMLString)
-            print("----------doc--------------")
-            print(myHTMLString)
-            print("----------doc--------------")
-         
-            let elements = try doc.getElementsByClass("recaptcha")
-            let a = try elements.first()?.text()
-            print(a)
-            
-        } catch Exception.Error(let type, let message) {
-            print(message)
-        } catch {
-            print("error")
-        }
 
     }
     
@@ -62,49 +42,28 @@ class StartViewController: RealmVC,  QRCodeReaderViewControllerDelegate {
             print(result.value)
             if result.value.count == 13 {
                 
-                do {
-                    let myHTMLString = try String(contentsOf: URL(string: self.isbnSearchURL + result.value)!, encoding: .ascii)
-                    
-                    do {
-                        let doc: Document = try SwiftSoup.parse("")
-                        print("----------doc--------------")
-                        print(doc)
-                        print("----------doc--------------")
-                        let a = try doc.select("bookinfo")
-                        let b = try a.text()
-                        print(a)
-                        print(b)
+                AF.request(self.googleURL + result.value, method: .get).responseData { (response) in
 
-                    } catch Exception.Error(let type, let message) {
-                        print(message)
-                    } catch {
-                        print("error")
-                    }
+                    let json = try! JSON(data: response.data!)
+                    let book = json["items"][0]["volumeInfo"]["title"].stringValue
+                    let author = json["items"][0]["volumeInfo"]["authors"][0].stringValue
+                    let yearOfPublication = json["items"][0]["volumeInfo"]["publishedDate"].stringValue
+                    let pageCount = json["items"][0]["volumeInfo"]["pageCount"].stringValue
                     
-//                    let authorPattern = "(?<=<p><strong>Author:<strong>)(.*?)(?=</p>)"
-//                    let publisherPattern = "(?<=<p><strong>Publisher:<strong>)(.*?)(?=</p>)"
-//                    let publishYearPattern = "(?<=<p><strong>Publish:<strong>)(.*?)(?=</p>)"
                     
-//                    let author = myHTMLString[myHTMLString.range(of: authorPattern, options: .regularExpression)!].trimmingCharacters(in: .whitespaces)
-//                    let publisher = myHTMLString[myHTMLString.range(of: publisherPattern, options: .regularExpression)!].trimmingCharacters(in: .whitespaces)
-//                    let yearOfPublish = myHTMLString[myHTMLString.range(of: publishYearPattern, options: .regularExpression)!].trimmingCharacters(in: .whitespaces)
-//
-//                    print(author)
-//                    print(publisher)
-//                    print(yearOfPublish)
-                    
-                } catch let error {
-                    print(error)
-                }
-                
-//                AF.request(self.isbnSearchURL + result.value, method: .get).responseData { (response) in
-//
+//                    print("Book: \(book)\nAuthor: \(author)\nYear: \(yearOfPublication)")
+                    self.bookDetailsDictionary["ISBN"] = String(result.value)
+                    self.bookDetailsDictionary["Фамилия автора"] = author
+                    self.bookDetailsDictionary["Название книги"] = book
+                    self.bookDetailsDictionary["Год издания"] = yearOfPublication
+                    self.bookDetailsDictionary["Число страниц"] = pageCount
+                    self.performSegue(withIdentifier: "NewBook", sender: self)
 //                    let xml = XML.parse(response.data!)
 //                    guard let bookName = xml["response", "ltml", "item", "title"].text else { return }
 //                    guard let author = xml["response", "ltml", "item", "author"].text else { return }
 //                    print(bookName)
 //                    print(author)
-//                }
+                }
                 
             } else {
                 let arrayOfResults = result.value.components(separatedBy: "\r\n")
